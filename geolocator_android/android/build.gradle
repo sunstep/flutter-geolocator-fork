@@ -19,6 +19,20 @@ rootProject.allprojects {
     }
 }
 
+def dartDefines = [
+        geolocatorNoPlay: 'false'
+]
+if (project.hasProperty('dart-defines')) {
+    def defines = project.property('dart-defines')
+            .split(',')
+            .collectEntries { entry ->
+                def decoded = new String(entry.decodeBase64(), 'UTF-8')
+                def pair = decoded.split('=', 2)
+                [(pair[0]): pair.length > 1 ? pair[1] : '']
+            }
+    dartDefines += defines
+}
+
 apply plugin: 'com.android.library'
 
 android {
@@ -41,7 +55,10 @@ android {
 }
 
 dependencies {
-    implementation 'com.google.android.gms:play-services-location:21.2.0'
+
+    if (dartDefines['geolocatorNoPlay'] == 'false') {
+        implementation 'com.google.android.gms:play-services-location:21.2.0'
+    }
     implementation 'androidx.core:core:1.16.0'
 
     testImplementation 'junit:junit:4.13.2'
